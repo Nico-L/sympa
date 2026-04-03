@@ -24,7 +24,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsyslog \
     openssl
 
-RUN apt-get install -y --no-install-recommends sympa postfix postfix-pcre
+RUN apt-get install -y --no-install-recommends sympa
+RUN apt-get install -y --no-install-recommends postfix
+RUN apt-get install -y --no-install-recommends postfix-pcre
 
 RUN apt-get install -y --no-install-recommends libsasl2-modules libsasl2-2
 
