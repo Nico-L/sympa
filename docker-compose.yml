@@ -37,13 +37,6 @@ services:
       - sympa-postfix:/var/spool/postfix
     expose:
       - "80"
-    labels:
-      - traefik.enable=true
-      - "traefik.http.routers.sympa.rule=Host(`${SYMPA_DOMAIN}`)"
-      - traefik.http.routers.sympa.entryPoints=https
-      - traefik.http.routers.sympa.tls=true
-      - traefik.http.routers.sympa.tls.certresolver=letsencrypt
-      - traefik.http.services.sympa.loadbalancer.server.port=80
 
 volumes:
   sympa-db-data:
