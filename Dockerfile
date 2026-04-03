@@ -1,7 +1,7 @@
 # Utilise une image Debian stable
 FROM debian:stable
 
-# Installe les dépendances de base et les outils nécessaires
+# Installe les dépendances de base
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -12,8 +12,9 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Ajoute les clés GPG pour les dépôts Debian
-RUN wget -qO- https://ftp-master.debian.org/keys/archive-key-$(lsb_release -sc).asc | apt-key add -
+# Télécharge et installe la clé GPG pour les dépôts Debian
+RUN mkdir -p /etc/apt/trusted.gpg.d && \
+    wget -qO- https://ftp-master.debian.org/keys/archive-key-$(lsb_release -sc).asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/debian-archive-$(lsb_release -sc).gpg
 
 # Ajoute les dépôts Debian officiels
 RUN echo "deb http://deb.debian.org/debian $(lsb_release -sc) main" > /etc/apt/sources.list && \
