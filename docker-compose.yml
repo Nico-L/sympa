@@ -1,48 +1,46 @@
+version: '3.8'
+
 services:
-  sympa-db:
-    image: mariadb:11
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-sympa}
-      MYSQL_USER: ${MYSQL_USER:-sympa}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    volumes:
-      - sympa-db-data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   sympa:
-    image: ghcr.io/nico-l/sympa:latest
+    image: ghcr.io/votre-utilisateur/sympa-custom:latest
+    container_name: sympa
     restart: unless-stopped
-    depends_on:
-      sympa-db:
-        condition: service_healthy
     environment:
-      SYMPA_DOMAIN: ${SYMPA_DOMAIN}
-      SYMPA_LISTMASTERS: ${SYMPA_LISTMASTERS}
-      SYMPA_DB_HOST: sympa-db
-      SYMPA_DB_NAME: ${MYSQL_DATABASE:-sympa}
-      SYMPA_DB_USER: ${MYSQL_USER:-sympa}
-      SYMPA_DB_PASS: ${MYSQL_PASSWORD}
-      MAILJET_API_KEY: ${MAILJET_API_KEY}
-      MAILJET_SECRET_KEY: ${MAILJET_SECRET_KEY}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
-      - sympa-etc:/etc/sympa
-      - sympa-lib:/var/lib/sympa
-      - sympa-spool:/var/spool/sympa
-      - sympa-postfix:/var/spool/postfix
-    expose:
-      - "80"
-    ports:
-      - "80"
+      - ./sympa-config/includes:/etc/sympa/includes
+      - ./sympa-config/shared:/etc/sympa/shared
+    depends_on:
+      - db
+      - postfix
 
-volumes:
-  sympa-db-data:
-  sympa-etc:
-  sympa-lib:
-  sympa-spool:
-  sympa-postfix:
+  postfix:
+    image: tozd/postfix:latest
+    container_name: postfix
+    restart: unless-stopped
+    environment:
+      - MYNETWORKS=172.16.0.0/12
+      - SMTP_ONLY=1
+      - SYMPA_DOMAIN=${SYMPA_DOMAIN}
+      - MAILJET_SMTP_HOST=${MAILJET_SMTP_HOST}
+      - MAILJET_SMTP_PORT=${MAILJET_SMTP_PORT}
+      - MAILJET_SMTP_USER=${MAILJET_SMTP_USER}
+      - MAILJET_SMTP_PASS=${MAILJET_SMTP_PASS}
+    volumes:
+      - ./sympa-config/shared:/etc/sympa/shared
+      - ./postfix/main.cf:/etc/postfix/main.cf
+      - ./postfix/sasl_passwd:/etc/postfix/sasl_passwd
+      - ./postfix/entrypoint.sh:/entrypoint.sh
+    entrypoint: /entrypoint.sh
+    command: postfix start-fg
+    ports:
+      - "25:25"
+
+  db:
+    image: mysql:5.7
+    container_name: sympa-db
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - ./mysql-data:/var/lib/mysql
