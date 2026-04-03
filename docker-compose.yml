@@ -37,6 +37,8 @@ services:
       - sympa-postfix:/var/spool/postfix
     expose:
       - "80"
+    labels:
+      - "caddy_0.handle_path.0_reverse_proxy={{upstreams 80}}"
 
 volumes:
   sympa-db-data:
