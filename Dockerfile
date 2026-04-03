@@ -56,9 +56,6 @@ RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
     echo 'sed -i "/imklog/d" /etc/rsyslog.d/*.conf 2>/dev/null || true' >> /entrypoint.sh && \
     echo 'rsyslogd' >> /entrypoint.sh && \
     echo 'sleep 1' >> /entrypoint.sh && \
-    echo '# Démarrer rsyslog en premier pour créer /dev/log' >> /entrypoint.sh && \
-    echo 'rsyslogd' >> /entrypoint.sh && \
-    echo 'sleep 1' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
     echo 'envsubst < /docker-config/postfix-main.cf.tpl > /etc/postfix/main.cf' >> /entrypoint.sh && \
     echo 'envsubst < /docker-config/sasl_passwd.tpl > /etc/postfix/sasl_passwd' >> /entrypoint.sh && \
