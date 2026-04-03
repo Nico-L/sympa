@@ -48,6 +48,13 @@ RUN apt-get install -y --no-install-recommends \
 COPY config/ /docker-config/
 
 RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
+    echo '# Supprimer les sockets/pid qui trainent au redémarrage' >> /entrypoint.sh && \
+    echo 'rm -f /run/fcgiwrap.socket /run/rsyslogd.pid' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
+    echo '# Démarrer rsyslog en premier pour créer /dev/log' >> /entrypoint.sh && \
+    echo 'rsyslogd' >> /entrypoint.sh && \
+    echo 'sleep 1' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
     echo 'envsubst < /docker-config/postfix-main.cf.tpl > /etc/postfix/main.cf' >> /entrypoint.sh && \
     echo 'envsubst < /docker-config/sasl_passwd.tpl > /etc/postfix/sasl_passwd' >> /entrypoint.sh && \
     echo 'chmod 600 /etc/postfix/sasl_passwd' >> /entrypoint.sh && \
@@ -66,7 +73,7 @@ RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
     echo 'echo "wwsympa_url https://${SYMPA_DOMAIN}/sympa" >> /etc/sympa/sympa/sympa.conf' >> /entrypoint.sh && \
     echo 'echo "cookie $(openssl rand -hex 16)" >> /etc/sympa/sympa/sympa.conf' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo '# Configuration nginx pour wwsympa' >> /entrypoint.sh && \
+    echo '# Config nginx' >> /entrypoint.sh && \
     echo 'cat > /etc/nginx/sites-available/sympa << NGINXEOF' >> /entrypoint.sh && \
     echo 'server {' >> /entrypoint.sh && \
     echo '    listen 80;' >> /entrypoint.sh && \
@@ -86,8 +93,7 @@ RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
     echo 'ln -sf /etc/nginx/sites-available/sympa /etc/nginx/sites-enabled/sympa' >> /entrypoint.sh && \
     echo 'rm -f /etc/nginx/sites-enabled/default' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo '# Démarrage fcgiwrap AVANT nginx' >> /entrypoint.sh && \
-    echo 'mkdir -p /run' >> /entrypoint.sh && \
+    echo '# Démarrer fcgiwrap sur socket unix' >> /entrypoint.sh && \
     echo 'fcgiwrap -s unix:/run/fcgiwrap.socket &' >> /entrypoint.sh && \
     echo 'sleep 1' >> /entrypoint.sh && \
     echo 'chown www-data:www-data /run/fcgiwrap.socket' >> /entrypoint.sh && \
