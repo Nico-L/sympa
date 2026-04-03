@@ -1,8 +1,21 @@
 FROM debian:bookworm-slim
 
+# Déclaration des ARG injectés par Coolify au build
+ARG COOLIFY_FQDN
+ARG MAILJET_API_KEY
+ARG SERVICE_URL_SYMPA
+ARG SERVICE_FQDN_SYMPA
+ARG MYSQL_ROOT_PASSWORD
+ARG SYMPA_DOMAIN
+ARG SYMPA_LISTMASTERS
+ARG MYSQL_DATABASE
+ARG MYSQL_USER
+ARG MYSQL_PASSWORD
+ARG MAILJET_SECRET_KEY
+ARG COOLIFY_BUILD_SECRETS_HASH
+
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Installation de Sympa + Postfix + Nginx + dépendances
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sympa \
     postfix \
@@ -19,7 +32,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     rsyslog \
     && rm -rf /var/lib/apt/lists/*
 
-# Dossier de scripts
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
