@@ -51,6 +51,11 @@ RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
     echo '# Supprimer les sockets/pid qui trainent au redémarrage' >> /entrypoint.sh && \
     echo 'rm -f /run/fcgiwrap.socket /run/rsyslogd.pid' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
+    echo '# Désactiver imklog qui nécessite /proc/kmsg (interdit en conteneur)' >> /entrypoint.sh && \
+    echo 'sed -i "/imklog/d" /etc/rsyslog.conf' >> /entrypoint.sh && \
+    echo 'sed -i "/imklog/d" /etc/rsyslog.d/*.conf 2>/dev/null || true' >> /entrypoint.sh && \
+    echo 'rsyslogd' >> /entrypoint.sh && \
+    echo 'sleep 1' >> /entrypoint.sh && \
     echo '# Démarrer rsyslog en premier pour créer /dev/log' >> /entrypoint.sh && \
     echo 'rsyslogd' >> /entrypoint.sh && \
     echo 'sleep 1' >> /entrypoint.sh && \
