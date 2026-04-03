@@ -1,37 +1,47 @@
-name: Build & Push Sympa image
+name: Docker Build and Push
 
 on:
   push:
-    branches: [main]
-    paths:
-      - Dockerfile
-      - config/**
-      - entrypoint.sh
+    branches: [ "main" ]
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: nico-l/sympa
+  IMAGE_NAME: nico-l/sympa-custom  # Force le format en minuscules
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Log in to GHCR
+      - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/nico-l/sympa:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            SYMPA_DB_USER=${{ secrets.SYMPA_DB_USER }}
+            SYMPA_DB_PASS=${{ secrets.SYMPA_DB_PASS }}
+            SYMPA_DB_NAME=${{ secrets.SYMPA_DB_NAME }}
+            SYMPA_DOMAIN=${{ secrets.SYMPA_DOMAIN }}
+            SYMPA_LISTMASTERS=${{ secrets.SYMPA_LISTMASTERS }}
