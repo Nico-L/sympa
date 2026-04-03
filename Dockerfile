@@ -16,19 +16,17 @@ ARG COOLIFY_BUILD_SECRETS_HASH
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    sympa \
-    postfix \
-    postfix-pcre \
-    libsasl2-modules \
-    libsasl2-2 \
     ca-certificates \
     nginx \
     fcgiwrap \
     gettext-base \
     procps \
     rsyslog \
-    openssl \
-    && rm -rf /var/lib/apt/lists/*
+    openssl
+
+RUN apt-get install -y --no-install-recommends sympa postfix postfix-pcre libsasl2-modules libsasl2-2
+
+RUN rm -rf /var/lib/apt/lists/*
 
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
