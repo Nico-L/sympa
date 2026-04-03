@@ -21,13 +21,16 @@ RUN apt-get update && \
     add-apt-repository universe && \
     apt-get update
 
-RUN echo "sympa sympa/db_type select none" | debconf-set-selections && \
-    echo "sympa sympa/listmaster string root@localhost" | debconf-set-selections && \
-    echo "sympa sympa/domain string localhost" | debconf-set-selections && \
-    echo "postfix postfix/mailname string localhost" | debconf-set-selections && \
+RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections && \
     echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections
 
-RUN apt-get install -y --no-install-recommends -o Debug::pkgProblemResolver=yes \
+# Créer un sympa.conf minimal AVANT l'installation pour éviter l'erreur
+# de post-install qui cherche listmaster dans le fichier de config
+RUN mkdir -p /etc/sympa/sympa && \
+    printf 'domain\tlocalhost\nlistmaster\troot@localhost\ndb_type\tSQLite\ndb_name\t/var/lib/sympa/sympa.sqlite\n' \
+    > /etc/sympa/sympa/sympa.conf
+
+RUN apt-get install -y --no-install-recommends \
         sympa \
         postfix \
         postfix-pcre \
@@ -39,11 +42,8 @@ RUN apt-get install -y --no-install-recommends -o Debug::pkgProblemResolver=yes 
         gettext-base \
         procps \
         rsyslog \
-        openssl 2>&1 || true
-
-RUN apt-get install -y sympa 2>&1
-
-RUN rm -rf /var/lib/apt/lists/*
+        openssl && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
