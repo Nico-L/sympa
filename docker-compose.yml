@@ -6,10 +6,19 @@ services:
     container_name: sympa
     restart: unless-stopped
     environment:
+      - SYMPA_DOMAIN=${SYMPA_DOMAIN}
+      - SYMPA_LISTMASTERS=${SYMPA_LISTMASTERS}
+      - SYMPA_DB_NAME=${SYMPA_DB_NAME}
+      - SYMPA_DB_USER=${SYMPA_DB_USER}
+      - SYMPA_DB_PASS=${SYMPA_DB_PASS}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MAILJET_SMTP_HOST=${MAILJET_SMTP_HOST}
+      - MAILJET_SMTP_PORT=${MAILJET_SMTP_PORT}
+      - MAILJET_SMTP_USER=${MAILJET_SMTP_USER}
+      - MAILJET_SMTP_PASS=${MAILJET_SMTP_PASS}
     volumes:
-      - ./sympa-config/includes:/etc/sympa/includes
-      - ./sympa-config/shared:/etc/sympa/shared
+      - ./sympa-data/includes:/etc/sympa/includes
+      - ./sympa-data/shared:/etc/sympa/shared
     depends_on:
       - db
       - postfix
@@ -21,16 +30,11 @@ services:
     environment:
       - MYNETWORKS=172.16.0.0/12
       - SMTP_ONLY=1
-      - SYMPA_DOMAIN=${SYMPA_DOMAIN}
-      - MAILJET_SMTP_HOST=${MAILJET_SMTP_HOST}
-      - MAILJET_SMTP_PORT=${MAILJET_SMTP_PORT}
-      - MAILJET_SMTP_USER=${MAILJET_SMTP_USER}
-      - MAILJET_SMTP_PASS=${MAILJET_SMTP_PASS}
     volumes:
-      - ./sympa-config/shared:/etc/sympa/shared
-      - ./postfix/main.cf:/etc/postfix/main.cf
-      - ./postfix/sasl_passwd:/etc/postfix/sasl_passwd
-      - ./postfix/entrypoint.sh:/entrypoint.sh
+      - ./sympa-data/shared:/etc/sympa/shared
+      - ./postfix-data/main.cf:/etc/postfix/main.cf
+      - ./postfix-data/sasl_passwd:/etc/postfix/sasl_passwd
+      - ./postfix-data/entrypoint.sh:/entrypoint.sh
     entrypoint: /entrypoint.sh
     command: postfix start-fg
     ports:
