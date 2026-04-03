@@ -1,3 +1,4 @@
+# trigger workflow
 FROM debian:bookworm-slim
 
 ARG COOLIFY_FQDN
