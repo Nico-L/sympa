@@ -1,0 +1,7 @@
+domain ${SYMPA_DOMAIN}
+listmasters ${SYMPA_LISTMASTERS}
+db_type mysql
+db_name ${SYMPA_DB_NAME}
+db_user ${SYMPA_DB_USER}
+db_pass ${SYMPA_DB_PASS}
+db_host db
