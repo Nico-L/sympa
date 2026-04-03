@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim
+FROM ubuntu:22.04
 
 ARG COOLIFY_FQDN
 ARG MAILJET_API_KEY
@@ -15,7 +15,6 @@ ARG COOLIFY_BUILD_SECRETS_HASH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Vérification des paquets disponibles dans bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sympa \
     postfix \
