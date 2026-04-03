@@ -49,6 +49,7 @@ RUN apt-get install -y --no-install-recommends \
 
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r//' /entrypoint.sh && chmod +x /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80 25
