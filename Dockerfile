@@ -20,9 +20,14 @@ RUN apt-get update && apt-get install -y software-properties-common \
     && add-apt-repository universe \
     && apt-get update
 
-# Diagnostic : on affiche ce que apt trouve pour sympa avant d'installer
-RUN apt-cache search sympa || true
-RUN apt-cache policy sympa || true
+# Pré-répondre aux questions debconf de sympa et postfix
+RUN apt-get install -y debconf-utils && \
+    echo "sympa sympa/db_type select none" | debconf-set-selections && \
+    echo "sympa sympa/listmaster string root@localhost" | debconf-set-selections && \
+    echo "sympa sympa/domain string localhost" | debconf-set-selections && \
+    echo "postfix postfix/mailname string localhost" | debconf-set-selections && \
+    echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections
+
 
 RUN apt-get install -y --no-install-recommends \
     libsasl2-modules \
