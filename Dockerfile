@@ -27,7 +27,7 @@ RUN echo "postfix postfix/mailname string localhost" | debconf-set-selections &&
 # Créer un sympa.conf minimal AVANT l'installation pour éviter l'erreur
 # de post-install qui cherche listmaster dans le fichier de config
 RUN mkdir -p /etc/sympa/sympa && \
-    printf 'domain\tlocalhost\nlistmaster\troot@localhost\ndb_type\tSQLite\ndb_name\t/var/lib/sympa/sympa.sqlite\n' \
+    printf 'domain localhost\nlistmaster root@localhost\ndb_type SQLite\ndb_name /var/lib/sympa/sympa.sqlite\n' \
     > /etc/sympa/sympa/sympa.conf
 
 RUN apt-get install -y --no-install-recommends \
