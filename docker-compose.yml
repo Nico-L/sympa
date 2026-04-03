@@ -37,6 +37,8 @@ services:
       - sympa-postfix:/var/spool/postfix
     expose:
       - "80"
+    ports:
+      - "80"
 
 volumes:
   sympa-db-data:
