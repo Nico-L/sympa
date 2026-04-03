@@ -20,6 +20,10 @@ RUN apt-get update && apt-get install -y software-properties-common \
     && add-apt-repository universe \
     && apt-get update
 
+# Diagnostic : on affiche ce que apt trouve pour sympa avant d'installer
+RUN apt-cache search sympa || true
+RUN apt-cache policy sympa || true
+
 RUN apt-get install -y --no-install-recommends \
     libsasl2-modules \
     libsasl2-2 \
