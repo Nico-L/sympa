@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: nico-l/sympa-custom  # Force le format en minuscules
+  IMAGE_NAME: ${{ github.repository_owner }}/sympa-custom
 
 jobs:
   build-and-push:
@@ -26,22 +26,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Extract metadata (tags, labels)
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push Docker image
+      - name: Build and push (generic image)
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            SYMPA_DB_USER=${{ secrets.SYMPA_DB_USER }}
-            SYMPA_DB_PASS=${{ secrets.SYMPA_DB_PASS }}
-            SYMPA_DB_NAME=${{ secrets.SYMPA_DB_NAME }}
-            SYMPA_DOMAIN=${{ secrets.SYMPA_DOMAIN }}
-            SYMPA_LISTMASTERS=${{ secrets.SYMPA_LISTMASTERS }}
+          # Pas de build-args sensibles !
