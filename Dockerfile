@@ -1,7 +1,7 @@
-# Utilise une image Debian stable avec les dépôts Sympa
+# Utilise une image Debian stable
 FROM debian:stable
 
-# Installe les dépendances nécessaires pour ajouter les dépôts Sympa
+# Installe les dépendances de base et les outils nécessaires
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -12,13 +12,16 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Ajoute le dépôt officiel de Sympa (pour Debian)
-RUN echo "deb http://ftp.debian.org/debian $(lsb_release -sc) main" > /etc/apt/sources.list.d/debian.list && \
-    echo "deb http://ftp.debian.org/debian $(lsb_release -sc)-backports main" >> /etc/apt/sources.list.d/debian.list && \
-    wget -O /etc/apt/trusted.gpg.d/debian-archive-keyring.gpg https://ftp-master.debian.org/keys/archive-key-$(lsb_release -sc).asc && \
+# Ajoute les clés GPG pour les dépôts Debian
+RUN wget -qO- https://ftp-master.debian.org/keys/archive-key-$(lsb_release -sc).asc | apt-key add -
+
+# Ajoute les dépôts Debian officiels
+RUN echo "deb http://deb.debian.org/debian $(lsb_release -sc) main" > /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian $(lsb_release -sc)-updates main" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian $(lsb_release -sc)-backports main" >> /etc/apt/sources.list && \
     apt-get update
 
-# Installe les dépendances pour Sympa, Postfix, etc.
+# Installe les dépendances pour Sympa
 RUN apt-get update && apt-get install -y \
     mysql-client \
     postfix \
