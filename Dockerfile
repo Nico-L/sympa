@@ -21,9 +21,6 @@ RUN apt-get update && apt-get install -y software-properties-common \
     && apt-get update
 
 RUN apt-get install -y --no-install-recommends \
-    sympa \
-    postfix \
-    postfix-pcre \
     libsasl2-modules \
     libsasl2-2 \
     ca-certificates \
@@ -34,7 +31,9 @@ RUN apt-get install -y --no-install-recommends \
     rsyslog \
     openssl \
     && rm -rf /var/lib/apt/lists/*
-
+RUN apt-get install -y --no-install-recommends sympa
+RUN apt-get install -y --no-install-recommends postfix
+RUN apt-get install -y --no-install-recommends postfix-pcre
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
