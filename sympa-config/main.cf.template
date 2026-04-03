@@ -1,0 +1,3 @@
+myhostname = ${SYMPA_DOMAIN}
+relayhost = ${MAILJET_SMTP_HOST}:${MAILJET_SMTP_PORT}
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
