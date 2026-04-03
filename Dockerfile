@@ -66,10 +66,34 @@ RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
     echo 'echo "wwsympa_url https://${SYMPA_DOMAIN}/sympa" >> /etc/sympa/sympa/sympa.conf' >> /entrypoint.sh && \
     echo 'echo "cookie $(openssl rand -hex 16)" >> /etc/sympa/sympa/sympa.conf' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo 'rsyslogd' >> /entrypoint.sh && \
+    echo '# Configuration nginx pour wwsympa' >> /entrypoint.sh && \
+    echo 'cat > /etc/nginx/sites-available/sympa << NGINXEOF' >> /entrypoint.sh && \
+    echo 'server {' >> /entrypoint.sh && \
+    echo '    listen 80;' >> /entrypoint.sh && \
+    echo '    server_name _;' >> /entrypoint.sh && \
+    echo '    location /sympa {' >> /entrypoint.sh && \
+    echo '        include /etc/nginx/fastcgi_params;' >> /entrypoint.sh && \
+    echo '        fastcgi_pass unix:/run/fcgiwrap.socket;' >> /entrypoint.sh && \
+    echo '        fastcgi_param SCRIPT_FILENAME /usr/lib/cgi-bin/sympa/wwsympa.fcgi;' >> /entrypoint.sh && \
+    echo '        fastcgi_param SCRIPT_NAME /sympa;' >> /entrypoint.sh && \
+    echo '        fastcgi_param DOCUMENT_ROOT /usr/share/sympa/static_content;' >> /entrypoint.sh && \
+    echo '    }' >> /entrypoint.sh && \
+    echo '    location /static-sympa {' >> /entrypoint.sh && \
+    echo '        alias /usr/share/sympa/static_content;' >> /entrypoint.sh && \
+    echo '    }' >> /entrypoint.sh && \
+    echo '}' >> /entrypoint.sh && \
+    echo 'NGINXEOF' >> /entrypoint.sh && \
+    echo 'ln -sf /etc/nginx/sites-available/sympa /etc/nginx/sites-enabled/sympa' >> /entrypoint.sh && \
+    echo 'rm -f /etc/nginx/sites-enabled/default' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
+    echo '# Démarrage fcgiwrap AVANT nginx' >> /entrypoint.sh && \
+    echo 'mkdir -p /run' >> /entrypoint.sh && \
+    echo 'fcgiwrap -s unix:/run/fcgiwrap.socket &' >> /entrypoint.sh && \
+    echo 'sleep 1' >> /entrypoint.sh && \
+    echo 'chown www-data:www-data /run/fcgiwrap.socket' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
     echo 'service postfix start' >> /entrypoint.sh && \
     echo 'service nginx start' >> /entrypoint.sh && \
-    echo 'fcgiwrap &' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
     echo 'exec /usr/lib/sympa/bin/sympa_msg.pl' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
