@@ -14,35 +14,32 @@ ARG MAILJET_SECRET_KEY
 ARG COOLIFY_BUILD_SECRETS_HASH
 
 ENV DEBIAN_FRONTEND=noninteractive
+ENV DEBCONF_NONINTERACTIVE_SEEN=true
 
-# Activation du dépôt universe nécessaire pour sympa
-RUN apt-get update && apt-get install -y software-properties-common \
-    && add-apt-repository universe \
-    && apt-get update
-
-# Pré-répondre aux questions debconf de sympa et postfix
-RUN apt-get install -y debconf-utils && \
+RUN apt-get update && \
+    apt-get install -y software-properties-common debconf-utils && \
+    add-apt-repository universe && \
+    apt-get update && \
     echo "sympa sympa/db_type select none" | debconf-set-selections && \
     echo "sympa sympa/listmaster string root@localhost" | debconf-set-selections && \
     echo "sympa sympa/domain string localhost" | debconf-set-selections && \
     echo "postfix postfix/mailname string localhost" | debconf-set-selections && \
-    echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections
+    echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections && \
+    apt-get install -y --no-install-recommends \
+        sympa \
+        postfix \
+        postfix-pcre \
+        libsasl2-modules \
+        libsasl2-2 \
+        ca-certificates \
+        nginx \
+        fcgiwrap \
+        gettext-base \
+        procps \
+        rsyslog \
+        openssl && \
+    rm -rf /var/lib/apt/lists/*
 
-
-RUN apt-get install -y --no-install-recommends \
-    libsasl2-modules \
-    libsasl2-2 \
-    ca-certificates \
-    nginx \
-    fcgiwrap \
-    gettext-base \
-    procps \
-    rsyslog \
-    openssl \
-    && rm -rf /var/lib/apt/lists/*
-RUN apt-get install -y --no-install-recommends sympa
-RUN apt-get install -y --no-install-recommends postfix
-RUN apt-get install -y --no-install-recommends postfix-pcre
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
