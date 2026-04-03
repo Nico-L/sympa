@@ -19,13 +19,15 @@ ENV DEBCONF_NONINTERACTIVE_SEEN=true
 RUN apt-get update && \
     apt-get install -y software-properties-common debconf-utils && \
     add-apt-repository universe && \
-    apt-get update && \
-    echo "sympa sympa/db_type select none" | debconf-set-selections && \
+    apt-get update
+
+RUN echo "sympa sympa/db_type select none" | debconf-set-selections && \
     echo "sympa sympa/listmaster string root@localhost" | debconf-set-selections && \
     echo "sympa sympa/domain string localhost" | debconf-set-selections && \
     echo "postfix postfix/mailname string localhost" | debconf-set-selections && \
-    echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections && \
-    apt-get install -y --no-install-recommends \
+    echo "postfix postfix/main_mailer_type select No configuration" | debconf-set-selections
+
+RUN apt-get install -y --no-install-recommends -o Debug::pkgProblemResolver=yes \
         sympa \
         postfix \
         postfix-pcre \
@@ -37,8 +39,11 @@ RUN apt-get update && \
         gettext-base \
         procps \
         rsyslog \
-        openssl && \
-    rm -rf /var/lib/apt/lists/*
+        openssl 2>&1 || true
+
+RUN apt-get install -y sympa 2>&1
+
+RUN rm -rf /var/lib/apt/lists/*
 
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
