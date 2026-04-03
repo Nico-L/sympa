@@ -1,0 +1,1 @@
+[in-v3.mailjet.com]:587 ${MAILJET_API_KEY}:${MAILJET_SECRET_KEY}
