@@ -15,22 +15,25 @@ ARG COOLIFY_BUILD_SECRETS_HASH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Activation du dépôt universe nécessaire pour sympa
+RUN apt-get update && apt-get install -y software-properties-common \
+    && add-apt-repository universe \
+    && apt-get update
+
+RUN apt-get install -y --no-install-recommends \
+    sympa \
+    postfix \
+    postfix-pcre \
+    libsasl2-modules \
+    libsasl2-2 \
     ca-certificates \
     nginx \
     fcgiwrap \
     gettext-base \
     procps \
     rsyslog \
-    openssl
-
-RUN apt-get install -y --no-install-recommends sympa
-RUN apt-get install -y --no-install-recommends postfix
-RUN apt-get install -y --no-install-recommends postfix-pcre
-
-RUN apt-get install -y --no-install-recommends libsasl2-modules libsasl2-2
-
-RUN rm -rf /var/lib/apt/lists/*
+    openssl \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY config/ /docker-config/
 COPY entrypoint.sh /entrypoint.sh
