@@ -103,7 +103,7 @@ RUN printf '#!/bin/bash\nset -e\n\n' > /entrypoint.sh && \
     echo 'service postfix start' >> /entrypoint.sh && \
     echo 'service nginx start' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo 'exec /usr/lib/sympa/bin/sympa_msg.pl' >> /entrypoint.sh && \
+    echo 'exec /usr/lib/sympa/bin/sympa_msg.pl --debug 2>&1' >> /entrypoint.sh && \
     chmod +x /entrypoint.sh
 
 EXPOSE 80 25
