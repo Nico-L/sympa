@@ -1,6 +1,5 @@
 FROM debian:bookworm-slim
 
-# Déclaration des ARG injectés par Coolify au build
 ARG COOLIFY_FQDN
 ARG MAILJET_API_KEY
 ARG SERVICE_URL_SYMPA
@@ -16,20 +15,20 @@ ARG COOLIFY_BUILD_SECRETS_HASH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Vérification des paquets disponibles dans bookworm
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sympa \
     postfix \
     postfix-pcre \
     libsasl2-modules \
     libsasl2-2 \
-    sasl2-bin \
     ca-certificates \
     nginx \
     fcgiwrap \
-    spawn-fcgi \
     gettext-base \
     procps \
     rsyslog \
+    openssl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY config/ /docker-config/
